@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <!-- app/src/main/res/values/colors.xml -->
+    <!-- Paleta Principal -->
+    <color name="primary">#9C27B0</color> <!-- Lilac -->
+    <color name="primaryDark">#7B1FA2</color> <!-- Darker Lilac -->
+    <color name="primaryLight">#E1BEE7</color> <!-- Lighter Lilac -->
+
+    <!-- Secundária -->
+    <color name="secondary">#FF4081</color> <!-- Pink -->
+
+    <!-- Background -->
+    <color name="backgroundLight">#F3E5F5</color> <!-- Very Light Lilac -->
+    <color name="backgroundDark">#512DA8</color> <!-- Dark Purple -->
+
+    <!-- Texto -->
+    <color name="textPrimary">#212121</color>
+    <color name="textSecondary">#757575</color>
+</resources>

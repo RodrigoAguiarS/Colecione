@@ -1,0 +1,9 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.Colecione" parent="Theme.Material3.DynamicColors.DayNight">
+        <!-- Customize your light theme here. -->
+        <item name="colorPrimary">@color/primaryDark</item>
+    </style>
+
+    <style name="Theme.Colecione" parent="Base.Theme.Colecione" />
+</resources>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_list"
+        android:icon="@drawable/baseline_list_24"
+        android:title="Lista" />
+    <item
+        android:id="@+id/nav_logout"
+        android:icon="@drawable/baseline_add_task_24"
+        android:title="Cadastrar" />
+    <item
+        android:id="@+id/nav_other"
+        android:icon="@drawable/baseline_deslogar_24"
+        android:title="Deslogar" />
+</menu>

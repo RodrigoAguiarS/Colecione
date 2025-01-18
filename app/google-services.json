@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "702739675085",
+    "project_id": "colecione-49035",
+    "storage_bucket": "colecione-49035.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:702739675085:android:071e639496165d9ec6b684",
+        "android_client_info": {
+          "package_name": "com.rodrigo.colecione"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZ6j1gGb1_OYWpPpjUzIvIHWlTdEKoheY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -15,7 +15,6 @@ firebase-storage = "21.0.1"
 firebase-analytics = "22.2.0"
 okhttp = "4.9.3"
 firebaseFirestore = "25.1.1"
-picasso = "2.71828"
 playServicesAuth = "21.3.0"
 
 [libraries]
@@ -35,7 +34,6 @@ firebase-auth = { module = "com.google.firebase:firebase-auth", version.ref = "f
 firebase-analytics = { module = "com.google.firebase:firebase-analytics", version.ref = "firebase-analytics" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
-picasso = { module = "com.squareup.picasso:picasso", version.ref = "picasso" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

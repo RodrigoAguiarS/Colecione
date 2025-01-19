@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -28,8 +29,8 @@ import com.rodrigo.colecione.R;
 import com.rodrigo.colecione.data.Categoria;
 import com.rodrigo.colecione.data.Raridade;
 import com.rodrigo.colecione.helper.DbHelper;
+import com.rodrigo.colecione.model.Produto;
 import com.rodrigo.colecione.ui.menu.BaseActivity;
-import com.rodrigo.colecione.util.CustomSpinnerAdapter;
 
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
@@ -40,8 +41,8 @@ import java.util.UUID;
 
 public class ProdutoFormActivity extends BaseActivity {
     private static final int PICK_IMAGE_REQUEST = 1;
-    private static final int CAPTURE_IMAGE_REQUEST = 2;
-    private static final int CAMERA_PERMISSION_REQUEST_CODE = 100;
+    static final int CAPTURE_IMAGE_REQUEST = 2;
+    static final int CAMERA_PERMISSION_REQUEST_CODE = 100;
     private EditText nomeEditText, descricaoEditText, precoEditText;
     private Spinner categoriaSpinner, raridadeSpinner;
     private ImageView fotoImageView;
@@ -55,12 +56,12 @@ public class ProdutoFormActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getLayoutInflater().inflate(R.layout.activity_produto_form, findViewById(R.id.container));
-        nomeEditText = findViewById(R.id.nameEditText);
-        descricaoEditText = findViewById(R.id.descriptionEditText);
-        precoEditText = findViewById(R.id.priceEditText);
-        categoriaSpinner = findViewById(R.id.categorySpinner);
-        raridadeSpinner = findViewById(R.id.raritySpinner);
-        fotoImageView = findViewById(R.id.photoImageView);
+        nomeEditText = findViewById(R.id.nomeProduto);
+        descricaoEditText = findViewById(R.id.descricaoProduto);
+        precoEditText = findViewById(R.id.precoProduto);
+        categoriaSpinner = findViewById(R.id.categoriaProduto);
+        raridadeSpinner = findViewById(R.id.raridadeProduto);
+        fotoImageView = findViewById(R.id.imagemProduto);
         ImageButton uploadButton = findViewById(R.id.uploadButton);
         ImageButton cameraButton = findViewById(R.id.cameraButton);
         Button salvarButton = findViewById(R.id.saveButton);
@@ -72,6 +73,7 @@ public class ProdutoFormActivity extends BaseActivity {
         uploadButton.setOnClickListener(v -> abrirSeletorDeArquivo());
         cameraButton.setOnClickListener(v -> verificarPermissaoCamera());
         salvarButton.setOnClickListener(v -> salvarColecionavel());
+        precoEditText.setText("0");
 
         setupCategoriaSpinner();
         setupRaridadeSpinner();
@@ -79,14 +81,14 @@ public class ProdutoFormActivity extends BaseActivity {
 
     private void setupCategoriaSpinner() {
         List<Categoria> categorias = new ArrayList<>(Arrays.asList(Categoria.values()));
-        CustomSpinnerAdapter<Categoria> categoriaAdapter = new CustomSpinnerAdapter<>(this, android.R.layout.simple_spinner_item, categorias);
+        ArrayAdapter<Categoria> categoriaAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categorias);
         categoriaAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         categoriaSpinner.setAdapter(categoriaAdapter);
     }
 
     private void setupRaridadeSpinner() {
         List<Raridade> raridades = new ArrayList<>(Arrays.asList(Raridade.values()));
-        CustomSpinnerAdapter<Raridade> raridadeAdapter = new CustomSpinnerAdapter<>(this, android.R.layout.simple_spinner_item, raridades);
+        ArrayAdapter<Raridade> raridadeAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, raridades);
         raridadeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         raridadeSpinner.setAdapter(raridadeAdapter);
     }
@@ -161,24 +163,18 @@ public class ProdutoFormActivity extends BaseActivity {
         Raridade raridade = (Raridade) raridadeSpinner.getSelectedItem();
         String precoStr = precoEditText.getText().toString();
 
-        if (nome.isEmpty() || descricao.isEmpty() || precoStr.isEmpty() || fotoUrl == null) {
-            Toast.makeText(this, "Preencha todos os campos", Toast.LENGTH_SHORT).show();
+        if (!validarCampos(nome, descricao, precoStr, fotoUrl)) {
+            Toast.makeText(this, "Preencha todos os campos corretamente", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        if (categoria == Categoria.SELECIONE || raridade == Raridade.SELECIONE) {
-            Toast.makeText(this, "Selecione uma ou mais opções", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        BigDecimal preco = new BigDecimal(precoStr);
         progressBar.setVisibility(View.VISIBLE);
-
-        salvarColecionavelNoSQLite(nome, descricao, categoria, raridade, fotoUrl, preco);
+        Produto produto = new Produto(0, nome, descricao, categoria, raridade, new BigDecimal(precoStr), fotoUrl);
+        salvarColecionavelNoSQLite(produto);
     }
 
-    private void salvarColecionavelNoSQLite(String nome, String descricao, Categoria categoria, Raridade raridade, String fotoUrl, BigDecimal preco) {
-        dbHelper.addProduto(nome, descricao, categoria.name(), raridade.name(), fotoUrl, preco);
+    private void salvarColecionavelNoSQLite(Produto produto) {
+        dbHelper.addProduto(produto);
         progressBar.setVisibility(View.GONE);
         Toast.makeText(this, "Colecionável salvo com sucesso", Toast.LENGTH_SHORT).show();
         navegarParaMainActivity();
@@ -196,5 +192,19 @@ public class ProdutoFormActivity extends BaseActivity {
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
         String path = MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, "Title", null);
         return Uri.parse(path);
+    }
+
+    public static boolean validarCampos(String nome, String descricao, String precoStr, String fotoUrl) {
+        if (nome.isEmpty() || descricao.isEmpty() || precoStr.isEmpty() || fotoUrl == null) {
+            return false;
+        }
+
+        try {
+            new BigDecimal(precoStr);
+        } catch (NumberFormatException e) {
+            return false;
+        }
+
+        return true;
     }
 }

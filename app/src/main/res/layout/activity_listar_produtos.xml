@@ -29,11 +29,13 @@
             android:id="@+id/prevButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="@color/primaryDark"
             android:src="@drawable/ic_next" />
         <ImageButton
             android:id="@+id/nextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="@color/primaryDark"
             android:src="@drawable/ic_prev"
             android:layout_marginStart="16dp" />
     </LinearLayout>

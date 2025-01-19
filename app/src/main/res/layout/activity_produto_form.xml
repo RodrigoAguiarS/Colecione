@@ -2,6 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/backgroundLight"
     android:padding="16dp">
 
@@ -15,7 +16,7 @@
 
         <!-- Campo da imagem reposicionado no topo -->
         <ImageView
-            android:id="@+id/photoImageView"
+            android:id="@+id/imagemProduto"
             android:layout_width="221dp"
             android:layout_height="206dp"
             android:layout_gravity="center"
@@ -24,6 +25,15 @@
             android:contentDescription="Imagem do Produto"
             android:scaleType="centerCrop"
             android:src="@drawable/baseline_image_24" />
+
+        <!-- Barra de Progresso -->
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_marginTop="16dp"
+            android:layout_gravity="center" />
 
         <!-- LinearLayout para os botões de upload e câmera -->
         <LinearLayout
@@ -59,7 +69,7 @@
 
         <!-- Campo Nome -->
         <EditText
-            android:id="@+id/nameEditText"
+            android:id="@+id/nomeProduto"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/nome"
@@ -71,7 +81,7 @@
 
         <!-- Campo Descrição -->
         <EditText
-            android:id="@+id/descriptionEditText"
+            android:id="@+id/descricaoProduto"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/descri_o"
@@ -83,7 +93,7 @@
 
         <!-- Spinner para Categoria -->
         <Spinner
-            android:id="@+id/categorySpinner"
+            android:id="@+id/categoriaProduto"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
@@ -94,7 +104,7 @@
 
         <!-- Spinner para Raridade -->
         <Spinner
-            android:id="@+id/raritySpinner"
+            android:id="@+id/raridadeProduto"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
@@ -105,7 +115,7 @@
 
         <!-- Campo Preço -->
         <EditText
-            android:id="@+id/priceEditText"
+            android:id="@+id/precoProduto"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Preço"
@@ -126,14 +136,5 @@
             android:textColor="@android:color/white"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp" />
-
-        <!-- Barra de Progresso -->
-        <ProgressBar
-            android:id="@+id/progressBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            android:layout_marginTop="16dp"
-            android:layout_gravity="center" />
     </LinearLayout>
 </ScrollView>

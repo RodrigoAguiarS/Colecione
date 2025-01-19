@@ -51,15 +51,15 @@ public class DbHelper extends SQLiteOpenHelper {
     }
 
     // Create
-    public void addProduto(String nome, String descricao, String categoria, String raridade, String urlDaImagem, BigDecimal preco) {
+    public void addProduto(Produto produto) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(COLUMN_NOME, nome);
-        values.put(COLUMN_DESCRICAO, descricao);
-        values.put(COLUMN_CATEGORIA, categoria);
-        values.put(COLUMN_RARIDADE, raridade);
-        values.put(COLUMN_URL_DA_IMAGEM, urlDaImagem);
-        values.put(COLUMN_PRECO, preco.doubleValue());
+        values.put(COLUMN_NOME, produto.getNome());
+        values.put(COLUMN_DESCRICAO, produto.getDescricao());
+        values.put(COLUMN_CATEGORIA, produto.getCategoria().getDescricao());
+        values.put(COLUMN_RARIDADE, produto.getRaridade().getDescricao());
+        values.put(COLUMN_URL_DA_IMAGEM, produto.getUrlDaImagem());
+        values.put(COLUMN_PRECO, produto.getPreco().toPlainString());
         db.insert(TABLE_PRODUTO, null, values);
         db.close();
     }
@@ -72,15 +72,15 @@ public class DbHelper extends SQLiteOpenHelper {
     }
 
     // Update
-    public int updateProduto(int id, String nome, String descricao, String categoria, String raridade, String urlDaImagem, BigDecimal preco) {
+    public int updateProduto(int id, Produto produto) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(COLUMN_NOME, nome);
-        values.put(COLUMN_DESCRICAO, descricao);
-        values.put(COLUMN_CATEGORIA, categoria);
-        values.put(COLUMN_RARIDADE, raridade);
-        values.put(COLUMN_URL_DA_IMAGEM, urlDaImagem);
-        values.put(COLUMN_PRECO, preco.doubleValue());
+        values.put(COLUMN_NOME, produto.getNome());
+        values.put(COLUMN_DESCRICAO, produto.getDescricao());
+        values.put(COLUMN_CATEGORIA, produto.getCategoria().getDescricao());
+        values.put(COLUMN_RARIDADE, produto.getRaridade().getDescricao());
+        values.put(COLUMN_URL_DA_IMAGEM, produto.getUrlDaImagem());
+        values.put(COLUMN_PRECO, produto.getPreco().toPlainString());
         return db.update(TABLE_PRODUTO, values, COLUMN_ID + "=?", new String[]{String.valueOf(id)});
     }
 
@@ -96,8 +96,8 @@ public class DbHelper extends SQLiteOpenHelper {
                 produto.setId(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)));
                 produto.setNome(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NOME)));
                 produto.setDescricao(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRICAO)));
-                produto.setCategoria(Categoria.valueOf(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORIA))));
-                produto.setRaridade(Raridade.valueOf(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_RARIDADE))));
+                produto.setCategoria(Categoria.fromDescricao(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORIA))));
+                produto.setRaridade(Raridade.fromDescricao(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_RARIDADE))));
                 produto.setPreco(new BigDecimal(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PRECO))));
                 produto.setUrlDaImagem(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_URL_DA_IMAGEM)));
                 produtos.add(produto);
@@ -115,10 +115,11 @@ public class DbHelper extends SQLiteOpenHelper {
         db.close();
     }
 
-    public List<Produto> buscaProdutosPorNome(String nome) {
+    public List<Produto> buscaProdutosPorNomeOuCategoriaOuRaridade(String termo) {
         List<Produto> produtos = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.query(TABLE_PRODUTO, null, COLUMN_NOME + " LIKE ?", new String[]{"%" + nome + "%"}, null, null, null);
+        Cursor cursor = db.query(TABLE_PRODUTO, null, COLUMN_NOME + " LIKE ? OR " + COLUMN_CATEGORIA + " LIKE ? OR " + COLUMN_RARIDADE + " LIKE ?",
+                new String[]{"%" + termo + "%", "%" + termo + "%", "%" + termo + "%"}, null, null, null);
 
         if (cursor != null) {
             while (cursor.moveToNext()) {
@@ -126,31 +127,8 @@ public class DbHelper extends SQLiteOpenHelper {
                 produto.setId(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)));
                 produto.setNome(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NOME)));
                 produto.setDescricao(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRICAO)));
-                produto.setCategoria(Categoria.valueOf(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORIA))));
-                produto.setRaridade(Raridade.valueOf(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_RARIDADE))));
-                produto.setPreco(new BigDecimal(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PRECO))));
-                produto.setUrlDaImagem(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_URL_DA_IMAGEM)));
-                produtos.add(produto);
-            }
-            cursor.close();
-        }
-        db.close();
-        return produtos;
-    }
-
-    public List<Produto> buscaProdutosPorNomeCategoria(String categoria) {
-        List<Produto> produtos = new ArrayList<>();
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.query(TABLE_PRODUTO, null, COLUMN_CATEGORIA + " LIKE ?", new String[]{"%" + categoria + "%"}, null, null, null);
-
-        if (cursor != null) {
-            while (cursor.moveToNext()) {
-                Produto produto = new Produto();
-                produto.setId(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)));
-                produto.setNome(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NOME)));
-                produto.setDescricao(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRICAO)));
-                produto.setCategoria(Categoria.valueOf(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORIA))));
-                produto.setRaridade(Raridade.valueOf(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_RARIDADE))));
+                produto.setCategoria(Categoria.fromDescricao(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORIA))));
+                produto.setRaridade(Raridade.fromDescricao(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_RARIDADE))));
                 produto.setPreco(new BigDecimal(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PRECO))));
                 produto.setUrlDaImagem(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_URL_DA_IMAGEM)));
                 produtos.add(produto);

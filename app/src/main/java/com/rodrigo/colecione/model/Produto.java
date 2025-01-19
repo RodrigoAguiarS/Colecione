@@ -16,6 +16,19 @@ public class Produto implements Serializable {
     private BigDecimal preco;
     private String urlDaImagem;
 
+    public Produto() {
+    }
+
+    public Produto(int id, String nome, String descricao, Categoria categoria, Raridade raridade, BigDecimal preco, String urlDaImagem) {
+        this.id = id;
+        this.nome = nome;
+        this.descricao = descricao;
+        this.categoria = categoria;
+        this.raridade = raridade;
+        this.preco = preco;
+        this.urlDaImagem = urlDaImagem;
+    }
+
     // Getters and Setters
     public int getId() {
         return id;

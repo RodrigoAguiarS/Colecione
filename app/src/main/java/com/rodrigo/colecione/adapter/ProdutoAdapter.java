@@ -3,14 +3,11 @@ package com.rodrigo.colecione.adapter;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Filter;
-import android.widget.Filterable;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -29,25 +26,20 @@ import com.rodrigo.colecione.R;
 import com.rodrigo.colecione.helper.DbHelper;
 import com.rodrigo.colecione.model.Produto;
 import com.rodrigo.colecione.ui.produto.DetalhesProdutoActivity;
+import com.rodrigo.colecione.ui.produto.EditarProdutoActivity;
 import com.rodrigo.colecione.util.CurrencyUtil;
-import com.squareup.picasso.Picasso;
+import com.rodrigo.colecione.util.FirebaseUtil;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 
-public class ProdutoAdapter extends RecyclerView.Adapter<ProdutoAdapter.ProdutoViewHolder> implements Filterable {
+public class ProdutoAdapter extends RecyclerView.Adapter<ProdutoAdapter.ProdutoViewHolder> {
 
     private final List<Produto> produtos;
-    private final List<Produto> produtosFull;
     private final Context context;
-    private static final int PAGE_SIZE = 10;
-    private int currentPage = 0;
 
     public ProdutoAdapter(List<Produto> produtos, Context context) {
         this.produtos = produtos;
-        this.produtosFull = new ArrayList<>(produtos);
         this.context = context;
     }
 
@@ -66,15 +58,15 @@ public class ProdutoAdapter extends RecyclerView.Adapter<ProdutoAdapter.ProdutoV
         holder.descricaoProduto.setText(produto.getDescricao());
         holder.categoriaProduto.setText(produto.getCategoria().getDescricao());
         holder.raridadeProduto.setText(produto.getRaridade().getDescricao());
+        String precoStr = CurrencyUtil.formatToBRL(new BigDecimal(String.valueOf(produto.getPreco())));
 
-        BigDecimal preco = produto.getPreco();
-        holder.precoProduto.setText(CurrencyUtil.formatToBRL(preco.doubleValue()));
-
-        Picasso.get().load(produto.getUrlDaImagem()).into(holder.imagemProduto);
-
+        holder.precoProduto.setText(precoStr);
         holder.progressBar.setVisibility(View.VISIBLE);
+
         Glide.with(holder.itemView.getContext())
                 .load(produto.getUrlDaImagem())
+                .placeholder(R.drawable.baseline_image_24)
+                .error(R.drawable.baseline_error_24)
                 .listener(new RequestListener<Drawable>() {
                     @Override
                     public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
@@ -83,88 +75,54 @@ public class ProdutoAdapter extends RecyclerView.Adapter<ProdutoAdapter.ProdutoV
                     }
 
                     @Override
-                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target,
+                                                   DataSource dataSource, boolean isFirstResource) {
                         holder.progressBar.setVisibility(View.GONE);
                         return false;
                     }
                 })
                 .into(holder.imagemProduto);
 
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(context, DetalhesProdutoActivity.class);
-                intent.putExtra("produto", (Serializable) produto);
-                context.startActivity(intent);
-            }
+        // Listener para abrir detalhes do produto
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, DetalhesProdutoActivity.class);
+            intent.putExtra("produto", produto);
+            context.startActivity(intent);
         });
 
-        holder.botaoDeletarProduto.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new AlertDialog.Builder(context)
-                        .setTitle("Confirmar Desativar")
-                        .setMessage("Você tem certeza que deseja desativar este produto?")
-                        .setPositiveButton("Sim", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                try (DbHelper dbHelper = new DbHelper(context)) {
-                                    dbHelper.deleteProduto(produto.getId());
-                                }
-                                produtos.remove(position);
-                                notifyItemRemoved(position);
-                                notifyItemRangeChanged(position, produtos.size());
+        holder.botaoEditarProduto.setOnClickListener(v -> {
+            Intent intent = new Intent(context, EditarProdutoActivity.class);
+            intent.putExtra("produto", produto);
+            context.startActivity(intent);
+        });
+
+        holder.botaoDeletarProduto.setOnClickListener(v -> {
+            new AlertDialog.Builder(context)
+                    .setTitle("Confirmar Apagar?")
+                    .setMessage("Você tem certeza que deseja apagar este item?")
+                    .setPositiveButton("Sim", (dialog, which) -> {
+                        FirebaseUtil.deleteImage(produto.getUrlDaImagem(), context, aVoid -> {
+                            try (DbHelper dbHelper = new DbHelper(context)) {
+                                dbHelper.deleteProduto(produto.getId());
                             }
-                        })
-                        .setNegativeButton("Não", null)
-                        .show();
-            }
+                            produtos.remove(position);
+                            notifyItemRemoved(position);
+                            notifyItemRangeChanged(position, produtos.size());
+                        });
+                    })
+                    .setNegativeButton("Não", null)
+                    .show();
         });
     }
 
     @Override
     public int getItemCount() {
-        return Math.min(produtos.size(), (currentPage + 1) * PAGE_SIZE);
+        return produtos.size();
     }
 
-    @Override
-    public Filter getFilter() {
-        return produtoFilter;
-    }
-
-    private Filter produtoFilter = new Filter() {
-        @Override
-        protected FilterResults performFiltering(CharSequence constraint) {
-            List<Produto> filteredList = new ArrayList<>();
-
-            if (constraint == null || constraint.length() == 0) {
-                filteredList.addAll(produtosFull);
-            } else {
-                String filterPattern = constraint.toString().toLowerCase().trim();
-
-                for (Produto item : produtosFull) {
-                    if (item.getNome().toLowerCase().contains(filterPattern) ||
-                            item.getCategoria().getDescricao().toLowerCase().contains(filterPattern) ||
-                            item.getRaridade().getDescricao().toLowerCase().contains(filterPattern)) {
-                        filteredList.add(item);
-                    }
-                }
-            }
-
-            FilterResults results = new FilterResults();
-            results.values = filteredList;
-            return results;
-        }
-
-        @Override
-        protected void publishResults(CharSequence constraint, FilterResults results) {
-            produtos.clear();
-            produtos.addAll((List) results.values);
-            notifyDataSetChanged();
-        }
-    };
-
-    public void loadNextPage() {
-        currentPage++;
+    public void setProdutos(List<Produto> novosProdutos) {
+        this.produtos.clear();
+        this.produtos.addAll(novosProdutos);
         notifyDataSetChanged();
     }
 

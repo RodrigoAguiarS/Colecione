@@ -3,7 +3,6 @@ package com.rodrigo.colecione.data;
 import androidx.annotation.NonNull;
 
 public enum Raridade {
-    SELECIONE("Escolha a raridade", "#FFFFFF"),
     COMUM("Comum", "#B0BEC5"),
     RARO("Raro", "#2196F3"),
     EPICO("Épico", "#9C27B0"),
@@ -29,5 +28,14 @@ public enum Raridade {
     @Override
     public String toString() {
         return descricao;
+    }
+
+    public static Raridade fromDescricao(String descricao) {
+        for (Raridade raridade : Raridade.values()) {
+            if (raridade.name().equalsIgnoreCase(descricao) || raridade.getDescricao().equalsIgnoreCase(descricao)) {
+                return raridade;
+            }
+        }
+        throw new IllegalArgumentException("No enum constant with descricao: " + descricao);
     }
 }
